@@ -1,2 +1,6 @@
-# Zero-Sum_Game_Analysis_Anon
-An exploration into the impact of skill and luck in a zero-sum game.
+# An exploration into measuring luck and skill in a zero-sum game.
+
+Relevant Files: 
+- README.md - Introduction
+- config.py - Styling options
+- more_styles.py - Styling options
