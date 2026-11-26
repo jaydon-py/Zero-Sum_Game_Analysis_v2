@@ -2,7 +2,7 @@
 
 Relevant Files: 
 - README.md - Introduction
-- All_Recorded_Games.csv - The Data
+- AllRecordedGames.csv - The Data
 - new_config.py - Styling options
 - analysis_1.py - 1st Chapter and visualisations (Spread of Results)
 - analysis_2.py - 2nd Chapter and visualisations (Distribution of PL)
