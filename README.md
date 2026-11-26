@@ -4,8 +4,10 @@ Relevant Files:
 - README.md - Introduction
 - AllRecordedGames.csv - The Data
 - new_config.py - Styling options
+- pl_spread.md - Explanation of the maths behind our first group of data visualisations in analysis_1.py.
 - analysis_1.py - 1st Chapter and visualisations (Spread of Results)
+- pl_dist.md - Explanation of the maths behind our second group of data visualisations in analysis_2.py
 - analysis_2.py - 2nd Chapter and visualisations (Distribution of PL)
+- overall_rating.md - Explanation of the maths behind our third group of data visualisations in analysis_3.py
 - analysis_3.py - 3rd Chapter and visualisations (Rating System)
-- foundational_notebook.ipynb - Notebook containing all visualisations and the inspiration behind them.
 - WORK IN PROGRESS.pdf - Complete LaTeX Report containing all visualisations, all mathematical foundations of models and statistical interpretations of the visualisations.
