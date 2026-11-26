@@ -2,7 +2,7 @@
 
 Relevant Files: 
 - README.md - Introduction
-- AllRecordedGames.csv - The Data
+- AllRecordedGames.csv - All data gathered until December 2026. 46 Games, 29 Unique Players.
 - new_config.py - Styling options
 - pl_spread.md - Explanation of the maths behind our first group of data visualisations in analysis_1.py.
 - analysis_1.py - 1st Chapter and visualisations (Spread of Results)
