@@ -1,0 +1,389 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{float}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=black]{hyperref}
+
+\newcommand{\reporttitle}{Luck \& Skill in a Zero-Sum Game}
+\newcommand{\reportsubtitle}{A Statistical Analysis of 46 Recorded Games\\and 29 Unique Players}
+\newcommand{\reportauthor}{Jaydon Tomlins}
+\newcommand{\reportdate}{November 2026}
+
+\title{\reporttitle}
+\author{\reportauthor}
+\date{\reportdate}
+
+\begin{document}
+
+\pagenumbering{gobble}
+\begin{titlepage}
+  \centering
+  \vspace*{\fill}
+
+  {\Huge\bfseries \reporttitle \par}
+  \vspace{0.6cm}
+  \rule{0.6\textwidth}{0.6pt}\par
+  \vspace{0.6cm}
+  {\Large \reportsubtitle \par}
+
+  \vspace{2.5cm}
+  {\large \reportauthor \par}
+  \vspace{0.2cm}
+  {\large \reportdate \par}
+
+  \vspace*{\fill}
+\end{titlepage}
+
+\clearpage\pagenumbering{arabic}
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{Justification}
+
+Every competitive game that involves chance raises the same question. If a player wins, how much of their result can we attribute to skill or luck (or lack thereof). A strong player can lose to an unlucky run of cards, and a weak player
+can win after a lucky one. It is only after repeated sessions where we might start to see real divergence in results.
+\\\\
+We study this question using Texas Hold'em poker for the following reasons:
+\begin{enumerate}
+  \item it is zero-sum;
+  \item A large component of the game is entirely random;
+  \item There is room for strategy and skill;
+  \item I already have a database of end of session results.
+\end{enumerate}
+
+\subsection{Recorded Data}
+
+As of November 2026, the dataset contains $G = 46$ recorded games involving 29 unique players, giving 220 player-game observations. For each observation we record the
+game, the player, the amount they bought in for, and the amount they cashed out. Tables ranged from $2$ to $9$ players and the total money put into play across all games was \pounds1{,}114.50. Participation is uneven. I appear in all 46 games, while many players appear only once or twice. This matters for inference, and we will return to this in the discussion.
+
+\subsection{Notation}
+
+Let $S$ be the set of all players and $S_g\subseteq S$ the set of players in game $g$. We call the numbers of players in game $g$, $n_g$ for which we have $n_g = |S_g|$. \\\\
+For player $i\in S_g$, the profit/loss (PL)
+in game $g$ is
+\begin{equation}
+  x_{g,i} \;=\; \text{Cash-out}_{g,i} \;-\; \text{Buy-in}_{g,i}.
+\end{equation}
+Player $i$'s cumulative PL across the whole dataset is
+\begin{equation}
+  T_i \;=\; \sum_{g:\, i\in S_g} x_{g,i},
+\end{equation}
+Where $g:\, i \in S_g$ is the condition that we sum all of $i$'s games in which they play and ignore the games they do not. Formally, this can be read as summing over all $g$ such that player $i$ is in the set $S_g$.\\\\
+Because the game is zero-sum, money is conserved within every game:
+\begin{equation}
+  \sum_{i\in S_g} x_{g,i} \;=\; 0 \qquad \forall g.
+\end{equation}
+This fixes the mean profit at exactly zero.
+
+\section{Testing For Skill}
+
+\subsection{Real Results}
+
+We start with the real results after 46 games. Recall that player $i$'s profit in game $g$ is
+$x_{g,i} = \text{Cash-out}_{g,i} - \text{Buy-in}_{g,i}$, and that their total profit across every game they played is
+
+\begin{equation}
+  T_i \;=\; \sum_{g:\, i\in S_g} x_{g,i}.
+\end{equation}
+
+Figure~\ref{fig:totals} shows $T_i$ for all $|S|=29$ players, ordered from the largest loss to the largest gain, with the number of games each player has played in brackets.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{cumulative_profit_nov26.png}
+  \caption{Total profit $T_i$ (\pounds) rounded to the nearest integer for each player after 46 games, with the number of games played in brackets.}
+  \label{fig:totals}
+\end{figure}
+
+Because every game is zero-sum, the sum of all player's PL will be zero.
+
+\begin{equation}
+  \sum_{i\in S} T_i\;=\; 0,
+\end{equation}
+
+so the winnings on the right of the figure exactly offset the losses on the left.\\\\
+Only $7$ of $29$ players finished in profit, while $22$ finished at a loss. As a result, the gains are very concentrated in a few players and the losses can be spread quite thinly.\\\\
+The largest winners are Sachin ($\pounds76.75$), Jaydon
+($\pounds41.24$), Scott ($\pounds17.01$) and Tim ($\pounds12.45$). And the largest losers are Michael ($-\pounds21.80$) and Reuben ($-\pounds21.62$).
+
+\subsection{Inference}
+
+The results we see here do not tell us much, and we could reasonably expect that this divergence would also happen in a game of pure chance, as under our null hypothesis, $H_0$. What matters then, is the spread of the results. Meaning, how far apart do the winners and losers sit in the results, and is this spread greater than we would expect to see in a world under $H_0$?
+
+Formally, we describe our hypothesis as:
+\begin{equation}
+  H_0:\ \text{every player } i \text{ has the same chance of any given result in a game.}
+\end{equation}
+Under $H_0$ there is no skill, and the differences between players in Figure~\ref{fig:totals} are purely the result of chance. If the real spread is far larger than the spread $H_0$ typically generates, we may have evidence of
+skill. 
+
+\subsection{Simulating a Luck-Only World}
+
+To judge whether the real spread is unusual, we simulate the spread $H_0$ would produce. We make an assumption under $H_0$ that the results at the end of each game are completely fixed, but as they are all down to chance, any person could've received them.\\\\
+Formally, in game $g$ the $n_g$ players are handed the $n_g$ observed profit figures in a random order. Let $\pi_g$ be a permutation of the players in $S_g$, chosen uniformly at random from the $n_g!$ possibilities, so each has
+probability $1/n_g!$. The shuffled result for player $i$ is
+\begin{equation}
+  x^{*}_{g,i} \;=\; x_{g,\pi_g(i)},
+\end{equation}
+and the games are shuffled independently of each other. One complete simulated alternative history is a single permutation drawn for every game, and it gives simulated totals
+\begin{equation}
+  T^{*}_i \;=\; \sum_{g:\, i\in S_g} x^{*}_{g,i}.
+\end{equation}
+
+There are $\prod_{g=1}^{G} n_g!$ possible histories, which is a lot. So, we draw $N = 100,000$ of them at random.
+
+\subsection{Measuring the Spread}
+
+We summarise how spread out the players' results are by the standard deviation of the totals. Let $n=|S|=29$. Since $\sum_i T_i = 0$, the mean total
+is
+\begin{equation}
+  \bar{T} = \frac{1}{n}\sum_{i=1}^{n} T_i = 0,
+\end{equation}
+so the standard deviation of the real totals simplifies to
+\begin{equation}
+  \sigma_T
+  = \sqrt{\frac{1}{n}\sum_{i=1}^{n}\left(T_i-\bar{T}\right)^2}
+  = \sqrt{\frac{1}{n}\sum_{i=1}^{n} T_i^{2}}.
+\end{equation}
+A large $\sigma_T$ means the players finished far apart. For an individual alternative history \\$k=1,\dots,N$, with totals $T^{*}_{k,i}$, we have,
+\begin{equation}
+  \sigma^{*}_k
+  = \sqrt{\frac{1}{n}\sum_{i=1}^{n}\left(T^{*}_{k,i}\right)^{2}}.
+\end{equation}
+
+So, the values $\sigma^{*}_1,\dots,\sigma^{*}_N$ describe how much spread luck alone has produced, and how much that varies from one history to the next.
+
+\subsection{The Monte Carlo p-value}
+
+We calculate a value which determines what proportion of total alternative histories produced some $\sigma^*_k$, at least as extreme as our real spread, $\sigma_T$. We call this, the p-value, calculated as follows:
+
+\begin{equation}
+    p=\frac{\text{number of shuffled histories at least as spread out as reality}+1}{\text{number of shuffled histories}+1}
+\end{equation}\\
+
+This formula is often written as:
+
+\begin{equation}
+    p = \frac{1 + \#\{k : \sigma^*_k \geq \sigma_T\}}{N + 1}
+\end{equation}\\
+
+Where $\#$ just means 'number of' and $\{k : \sigma^*_k \geq \sigma_T\}$ is the set of all shuffled histories $k$ such that its spread, $\sigma^*_k$ is greater than that of the spread of the real history. \\\\
+A small $p$ implies that luck alone rarely spreads players apart to this extreme, only this proportion of alternative histories produced under $H_0$ actually created an equivalent situation. \\\\
+A large $p$ implies that the real spread can easily be produced by luck.
+
+\subsection{Result}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{result_spread_all_nov26.png}
+  \caption{Distribution of the spread $\sigma^{*}_k$ across $N=100{,}000$
+           luck-only histories. The vertical line marks the real spread
+           $\sigma_T=\pounds18.54$, and the shaded bars are histories at least
+           this spread out.}
+  \label{fig:spread}
+\end{figure}
+
+The real spread of the 29 totals is $\sigma_T=\pounds18.54$. Across the
+100{,}000 luck-only histories the average spread is \pounds13.68, with the
+middle 90\% lying between \pounds9.68 and \pounds18.64. Of the 100{,}000
+histories, $5{,}307$ were at least as spread out as reality, so
+\begin{equation}
+  p = \frac{1+5{,}307}{100{,}000+1} \approx 0.053.
+\end{equation}
+
+\subsection{Interpretation}
+
+The real spread is about $36\%$ larger than our luck-only average ($18.54/13.68\approx1.36$), and it sits just inside the top of the middle 90\% range. It is unusually large, but not by enough to cross a conventional $5\%$ significance level: with $p=0.053$ we fail to reject $H_0$ at the
+$\alpha=0.05$ level. However, that is not to say there is no evidence of skill.\\\\
+The conclusion should be that the group's results lean away from pure chance without clearly rejecting it, which motivates looking at individual players in the next section.
+
+\newpage
+
+\section{Individual Performance}
+
+The spread test in the previous section asks a question about the group, it does not show whether or not any individual player's total is more than luck can explain. \\\\
+Recall For a player $i$, each alternative history $k=1,\dots,N$ gives a simulated total $T^{*}_{k,i}$. The results are described by counting histories at least as far
+from zero as the real total, in either direction (a two sided p-value):
+\begin{equation}
+  p_i \;=\; \frac{1+\#\{k:\ |T^{*}_{k,i}|\ge |T_i|\}}{N+1}.
+\end{equation}
+
+\subsection{Sachin}
+
+Sachin has played $7$ games and finished with $T_{\text{Sachin}}=\pounds76.75$, an average of
+about \pounds10.96 per game.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{result_spread_sachin_nov26.png}
+  \caption{Sachin's real total against the distribution of his
+           total in $100,000$ luck-only histories.}
+  \label{fig:sachin}
+\end{figure}
+
+His real total lies far from the outside of the range which is typically produced by chance. Only $6$ of the $100,000$
+luck-only histories gave him \pounds76.75 or more, so
+\begin{equation}
+  p = \frac{1+6}{100{,}001}\approx 0.00007 .
+\end{equation}
+
+The distribution is clearly right-skewed. It has a long tail to the right and a short one to the left. This is a natural feature of the game. A player can lose at most their buy-in in a given game, but can win many multiples of it.\\\\
+A result this extreme is very hard to attribute to
+luck alone, so Sachin's results are strong evidence of a genuine edge. The caveat is the small sample size. This is based on $7$ games, so the estimate of how large his edge is will be very uncertain.
+
+\subsection{Jaydon}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{result_spread_jaydon_nov26.png}
+  \caption{My real total against my own luck-only distribution}
+  \label{fig:jaydon}
+\end{figure}
+
+I have played every game, $46$ in total, and finished with
+$T_{\text{Jaydon}}=\pounds41.24$, the second-largest profit in the group. Over $46$ games my luck-only standard deviation is about \pounds32.05 and my 95\% luck range is
+very wide, from $\pounds-59.89$ to $\pounds65.27$.\\\\
+So my real total sits comfortably inside. There are 19,941 histories at least as far from zero in my own simulated histories, giving,
+
+\begin{equation}
+  p = \frac{1+19{,}941}{100{,}001}\approx 0.199 .
+\end{equation}
+
+What we can take from my results is that a large profit does not immediately imply a significant one. My simulated range is the widest simply because it is my recorded data, and I have played all the games. This does not show that I have no skill. With this much natural variation the test requires more evidence to separate skill from chance. However, I understand that I might be a little biased.
+
+\newpage
+
+\subsection{Reuben}
+
+Reuben has played 15 games and has a total of $T_{\text{Reuben}}=-\pounds21.62$, an average
+loss of about \pounds1.44 per game and the second-largest loss in the group.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{result_spread_reuben_nov26.png}
+  \caption{Reuben's real total against his luck-only distribution.}
+  \label{fig:reuben}
+\end{figure}
+
+22,944 histories were at least as far from zero:
+
+\begin{equation}
+  p = \frac{1+22{,}944}{100{,}001}\approx 0.229 .
+\end{equation}
+
+Reuben's loss is close to the boundary of what we would call unlucky, but it is inside it.
+
+\subsection{Drawing Conclusions}
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{lrrrr}
+    \hline
+    Player & Games & Real total (\pounds) & 95\% luck range (\pounds) & $p$ (two-sided) \\
+    \hline
+    Sachin & $7$  & $+76.75$ & $[-28.50,\ 41.45]$ & $0.00007$ \\
+    Jaydon & $46$ & $+41.24$ & $[-59.89,\ 65.27]$ & $0.199$ \\
+    Reuben & $15$ & $-21.62$ & $[-30.79,\ 42.50]$ & $0.229$ \\
+    \hline
+  \end{tabular}
+  \caption{Summary of the individual luck tests.}
+  \label{tab:individuals}
+\end{table}
+
+We can draw the following conclusions based on this, \begin{enumerate}
+  \item Total profit is a poor measure of skill on its own. I made roughly half of Sachin's profit but with 46 games rather than 7
+  \item The more someone plays, the harder it is to distinguish if they have an actual edge.
+  \item Sachin is the only outlier. The extreme spread seen in the group-level test is largely concentrated in a single player and not spread across the table.
+\end{enumerate}
+
+\section{Overall Rating System}
+
+\subsection{Motivation}
+
+We have shown that total profit is an inconsistent measure of ability. This section builds a rating that tries to
+measure ability more directly. The Overall Rating (OVR) looks at where a player finishes in each game relative to the others at the table, and at how strong those opponents were, rather than at the amount of money won or lost.
+
+\subsection{Definition}
+
+Consider a game with $n$ players. Let $p$ be a player's actual finishing position, ranked by profit, so $p=1$ is the biggest winner and $p=n$ is the biggest loser. Let $e$ be their expected finishing position, ranked by the players' OVR ratings just before the game, so the highest-rated player has
+$e=1$.\\\\
+We have two components: 
+
+\begin{enumerate}
+    \item Result points: A reward or penalty based on the player's finishing position. Called $R$.
+    \item Expectation points: An additional reward or penalty based on how their finishing position compares to their expected position. Called $E$.
+\end{enumerate}
+The change in OVR is then the sum of these two components:
+
+\begin{equation}
+    \Delta OVR = R + E
+\end{equation}
+
+Where
+
+\begin{equation}
+  R \;=\; B\left(\frac{n+1-2p}{n-1}\right),
+  \qquad
+  E \;=\; K\,(e-p).
+\end{equation}
+
+$B$ and $K$ are scale constants, we use $B=10$ and $K=5$\\\\
+The player's new OVR is then calculated as follows:
+
+\begin{equation}
+    OVR_{\text{new}}=OVR_{\text{old}}+\Delta OVR
+\end{equation}
+
+For some figures you may have differing values for OVR, this will be because when we go back through the data and calculate this value, it changes depending on whether or not we include players who have played 5 games or less. Often, we do not include these players. However, later when we check the correlation between OVR and cumulative profit, we do calculate it for all players, leading to a very small discrepancy.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{ovr_chart_nov26.png}
+  \caption{Current (solid) and highest (faded) OVR for players with more than
+           $5$ games. The dashed line marks the starting rating of $40$. The player '<5G' is the OVR of all players who have played 5 games or less, if they were playing as one player.}
+  \label{fig:ovr-bars}
+\end{figure}
+
+\subsection{Interpretation}
+
+Figure~\ref{fig:ovr-bars} shows who is rated above/below the start and how far people have fallen from their all time highs.\\\\
+Sachin is the only player at his peak. His current rating of 102 is also his highest, and it is more than 30 points above anyone else. This agrees with the profit results, and the implications from our hypothesis testing.\\\\
+Despite 7 players being in profit, we only have 4 players who are above their starting OVR. Sachin (102), Jack (67), Jaydon (65), Scott (47). We can make some inferences from this data. For example, we know that OVR rewards finishing in a strong position relative to other players, and finishing in a strong position relative to your expected position.\\\\
+So, we could potentially take from this that players who have consistently high OVR's consistently outperform and/or consistently outperform highly rated players.\\\\
+An interesting case study in this case would be Reuben. He has lost the second most out of any player, yet when it comes to OVR he places roughly in the middle at 28. This means that generally we might say he is losing, but to highly rated players, thus pushing his OVR downwards gradually, despite large losses.\\\\
+The gap between the two bars measures volatility, not skill. Gaps of between $12$ and $50$ points show that over a few games a rating can rise or fall a long way.
+
+\newpage
+
+\subsection{Correlation}
+
+Ultimately, the goal of playing a poker game is to come out having not lost any money. This would be a success. So how well does our rating system actually correlate to success in the game?\\\\
+The scatter plot places each player as a single poin with OVR on the x-axis and cumulative PL across all sessions on the y-axis. The regression line is a straight line of best fit drawn through those points.
+
+Pearson's coefficient, $r$, summarises how tightly the points cluster around the line. We have that $-1\leq r\leq 1$. Formally, we define $r$ as follows:
+
+\begin{equation}
+    r = \frac{\text{Cov}(O,P)}{\sigma_O~\sigma_P}
+\end{equation}
+
+Note, $\text{Cov}(O,P)$ is defined as the covariance between $O$, Current OVR, and $P$, total profit. And $\sigma_O$,$\sigma_P$ represents the standard deviation of the current OVR and total profit respectively.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{ovr_on_profit_nov26.png}
+  \caption{Current OVR against total profit for all $29$ players, with the line of best fit.}
+  \label{fig:ovr-scatter}
+\end{figure}
+
+
+\section{Profit Distribution}
+\section{Discussion \& Limitations}
+\section{Conclusion}
+
+\end{document}
